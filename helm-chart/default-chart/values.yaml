@@ -1,0 +1,12 @@
+serviceName: ''
+healthcheckUrl: ''
+healthcheckPort: 80
+image: ''
+hpaMinReplicas: 1
+hpaMaxReplicas: 1
+targetPort: 80
+servicePort: 80
+requestMemory: 8Mi
+requestCpu: 8m
+limitMemory: 300Mi
+limitCpu: 100m

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.serviceName }}-release-deployment
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.serviceName }}
+      version: release
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  replicas: {{ .Values.hpaMinReplicas }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.serviceName }}
+        version: release
+    spec:
+     
+      restartPolicy: Always
+      containers:
+      - name: {{ .Values.serviceName }}
+        image: {{ .Values.image }}
+        imagePullPolicy: IfNotPresent
+
+        envFrom:
+        - secretRef:
+            name: {{ .Values.serviceName }}-secret
+        
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.healthcheckUrl }}
+            port: {{ .Values.targetPort | default 80 }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          successThreshold: 1
+
+        resources:
+          requests:
+            memory: {{ .Values.requestMemory }}
+            cpu: {{ .Values.requestCpu }}
+          limits:
+            memory: {{ .Values.limitMemory }}
+            cpu: {{ .Values.limitCpu }}
+      
